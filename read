@@ -1,0 +1,21 @@
+#!/bin/bash
+
+# Check if a PDF filename is provided
+if [ -z "$1" ]; then
+    echo "Usage: $0 <pdf_filename>"
+    exit 1
+fi
+
+PDF_FILE=$1
+
+# Spin up the service, pass the PDF filename, and run the script
+PDF_FILE="$PDF_FILE" docker compose -p python-pdf-reader up -d
+
+# Get the actual container name
+container_name=$(docker ps --filter "name=python-pdf-reader" --format "{{.Names}}" | head -n 1)
+
+# Run the python script inside the container
+docker exec -it "$container_name" python read.py "$PDF_FILE"
+
+# Bring down the container after running the script
+docker compose -p python-pdf-reader down

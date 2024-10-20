@@ -1,0 +1,15 @@
+services:
+  python-pdf-reader:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ./books:/books
+      - ./app:/app
+      - ./output:/output
+    working_dir: /app
+    environment:
+      - PDF_FILE=${PDF_FILE}
+    command: ["python", "read.py", "$PDF_FILE"]
+    # stdin_open: true
+    # tty: true
