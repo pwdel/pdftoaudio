@@ -1,21 +1,53 @@
 #!/bin/bash
 
-# Check if a PDF filename is provided
+# Check if a command (pdf or speech) is provided
 if [ -z "$1" ]; then
-    echo "Usage: $0 <pdf_filename>"
+    echo "Usage: $0 <command> [<pdf_filename>]"
+    echo "Commands:"
+    echo "  pdf <pdf_filename>      Process a PDF file"
+    echo "  speech                  Convert text outputs to speech using Google Text-to-Speech"
     exit 1
 fi
 
-PDF_FILE=$1
+COMMAND=$1
 
-# Spin up the service, pass the PDF filename, and run the script
-PDF_FILE="$PDF_FILE" docker compose -p python-pdf-reader up -d
+# Handle the "pdf" command
+if [ "$COMMAND" == "pdf" ]; then
+    if [ -z "$2" ]; then
+        echo "Usage: $0 pdf <pdf_filename>"
+        exit 1
+    fi
 
-# Get the actual container name
-container_name=$(docker ps --filter "name=python-pdf-reader" --format "{{.Names}}" | head -n 1)
+    PDF_FILE=$2
 
-# Run the python script inside the container
-docker exec -it "$container_name" python read.py "$PDF_FILE"
+    # Spin up the service, pass the PDF filename, and run the script
+    PDF_FILE="$PDF_FILE" docker compose -p python-pdf-reader up -d python-pdf-reader
 
-# Bring down the container after running the script
-docker compose -p python-pdf-reader down
+    # Get the actual container name
+    container_name=$(docker ps --filter "name=python-pdf-reader" --format "{{.Names}}" | head -n 1)
+
+    # Run the python script inside the container
+    docker exec -it "$container_name" python read.py "$PDF_FILE"
+
+    # Bring down the container after running the script
+    docker compose -p python-pdf-reader down
+
+# Handle the "speech" command
+elif [ "$COMMAND" == "speech" ]; then
+    # Spin up the Google Text-to-Speech service
+    docker compose -p google-text-to-speech up -d google-text-to-speech
+
+    # Get the container name for the Google TTS service
+    container_name=$(docker ps --filter "name=google-text-to-speech" --format "{{.Names}}" | head -n 1)
+
+    # Bash into container where Google TTS Application is so we can run it
+    docker exec -it "$container_name" /bin/bash
+
+else
+    echo "Invalid command: $COMMAND"
+    echo "Usage: $0 <command> [<pdf_filename>]"
+    echo "Commands:"
+    echo "  pdf <pdf_filename>      Process a PDF file"
+    echo "  speech                  Convert text outputs to speech using Google Text-to-Speech"
+    exit 1
+fi
