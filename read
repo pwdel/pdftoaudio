@@ -34,14 +34,21 @@ if [ "$COMMAND" == "pdf" ]; then
 
 # Handle the "speech" command
 elif [ "$COMMAND" == "speech" ]; then
+    if [ -z "$2" ]; then
+        echo "Usage: $0 speech <text_filename>"
+        exit 1
+    fi
+
+    TEXT_FILE=$2
+
     # Spin up the Google Text-to-Speech service
     docker compose -p google-text-to-speech up -d google-text-to-speech
 
     # Get the container name for the Google TTS service
     container_name=$(docker ps --filter "name=google-text-to-speech" --format "{{.Names}}" | head -n 1)
 
-    # Bash into container where Google TTS Application is so we can run it
-    docker exec -it "$container_name" /bin/bash
+    # manual execution, open shell
+    docker exec -it -w /app "$container_name" /bin/bash
 
 else
     echo "Invalid command: $COMMAND"
