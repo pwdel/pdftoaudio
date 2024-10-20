@@ -119,6 +119,31 @@ def remove_page_number_with_blank_line(output_file_path: str) -> str:
     return output_file_path
 
 
+def calculate_cost_without_free_limit(output_file_path: str):
+    """
+    :param output_file_path: The full path to the output .txt file.
+    :return: The total cost of the character usage.
+    """
+
+    if not os.path.exists(output_file_path):
+        print(f"File '{output_file_path}' not found.")
+        return 0.0
+
+    with open(output_file_path, 'r') as file:
+        content = file.read()
+
+    num_characters = len(content)
+    print(f"Number of characters in {output_file_path}: {num_characters}")
+
+    # Pricing model (US$0.000004 per character)
+    price_per_character = 0.000004
+
+    # Calculate the total cost
+    total_cost = num_characters * price_per_character
+
+    print(f"Total cost for processing: ${total_cost:.6f}")
+
+
 def main():
 
     # file_name = input("Enter the PDF file name (with extension): ")
@@ -128,6 +153,8 @@ def main():
     remove_page_number_lines(output_file_path)
 
     remove_page_number_with_blank_line(output_file_path)
+
+    calculate_cost_without_free_limit(output_file_path)
 
 
 if __name__ == "__main__":

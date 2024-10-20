@@ -2,7 +2,7 @@ services:
   python-pdf-reader:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: pdftotext.Dockerfile
     volumes:
       - ./books:/books
       - ./app:/app
@@ -13,3 +13,16 @@ services:
     command: ["python", "read.py", "$PDF_FILE"]
     # stdin_open: true
     # tty: true
+
+  google-text-to-speech:
+    build:
+      context: .
+      dockerfile: google.Dockerfile
+    environment:
+      - GOOGLE_APPLICATION_CREDENTIALS=/secrets/key.json
+    volumes:
+      - ./secrets:/secrets
+      - ./output:/output
+    working_dir: /app
+    stdin_open: true
+    tty: true
