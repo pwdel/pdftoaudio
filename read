@@ -41,8 +41,9 @@ elif [ "$COMMAND" == "speech" ]; then
 
     TEXT_FILE=$2
 
-    # Spin up the Google Text-to-Speech service
-    docker compose -p google-text-to-speech up -d google-text-to-speech
+    # Build and spin up the Google Text-to-Speech service
+    docker compose build --no-cache google-text-to-speech
+    docker compose up -d google-text-to-speech
 
     # Get the container name for the Google TTS service
     container_name=$(docker ps --filter "name=google-text-to-speech" --format "{{.Names}}" | head -n 1)

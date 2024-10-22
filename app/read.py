@@ -5,7 +5,7 @@ from pypdf import PdfReader
 
 
 books_directory = "/books"
-output_directory = "/output"
+text_directory = "/text"
 
 
 def process_pdf(file_name: str) -> str:
@@ -28,7 +28,7 @@ def process_pdf(file_name: str) -> str:
         print(f"Processing '{file_name}' with {number_of_pages} pages.")
 
         # Create an output file path
-        output_file = os.path.join(output_directory, f"{file_name}.txt")
+        output_file = os.path.join(text_directory, f"{file_name}.txt")
         with open(output_file, 'w') as f:
             for i in range(number_of_pages):
                 page = reader.pages[i]
@@ -102,7 +102,9 @@ def remove_page_number_with_blank_line(output_file_path: str) -> str:
 
         # Check if the current line matches the
         # number pattern and the next line is blank
-        if number_pattern.match(line.strip()) and (i + 1 < len(lines) and lines[i + 1].strip() == ''):
+        if number_pattern.match(
+            line.strip()
+        ) and (i + 1 < len(lines) and lines[i + 1].strip() == ''):
             # Skip this line and the next blank line
             skip_next_line = True
         else:
@@ -114,7 +116,7 @@ def remove_page_number_with_blank_line(output_file_path: str) -> str:
         file.writelines(cleaned_lines)
 
     print(
-        f"Page numbers followed by blank lines removed from {output_file_path}."
+        f"Page #s followed by blank lines removed from {output_file_path}."
         )
     return output_file_path
 

@@ -1,6 +1,6 @@
 # google.Dockerfile
 
-FROM python:3.13-slim-bookworm
+FROM python:3.11.9-slim-bookworm
 
 # Set environment variable to avoid interactive prompts during build
 ENV DEBIAN_FRONTEND=noninteractive

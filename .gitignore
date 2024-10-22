@@ -1,4 +1,5 @@
 .DS_Store
 *.pdf
-output/*.txt
+text/*.txt
 secrets/*
+*.mp3
