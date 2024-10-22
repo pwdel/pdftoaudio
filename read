@@ -14,7 +14,7 @@ COMMAND=$1
 # Handle the "pdf" command
 if [ "$COMMAND" == "pdf" ]; then
     if [ -z "$2" ]; then
-        echo "Usage: $0 pdf <pdf_filename>"
+        echo "Usage: $0 pdf <pdf_file_basename>"
         exit 1
     fi
 
@@ -35,7 +35,7 @@ if [ "$COMMAND" == "pdf" ]; then
 # Handle the "speech" command
 elif [ "$COMMAND" == "speech" ]; then
     if [ -z "$2" ]; then
-        echo "Usage: $0 speech <text_filename>"
+        echo "Usage: $0 speech <chunked_text_file_directory_name>"
         exit 1
     fi
 

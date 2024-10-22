@@ -1,5 +1,7 @@
-.DS_Store
 *.pdf
-text/*.txt
-secrets/*
 *.mp3
+.DS_Store
+books/*
+secrets/*
+text/*
+
