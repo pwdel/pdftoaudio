@@ -1,3 +1,5 @@
+# syntax = docker/dockerfile:1.6
+
 FROM python:3.11.9-slim-bookworm
 
 # Set working directory in the container

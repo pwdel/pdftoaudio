@@ -1,0 +1,35 @@
+#!/bin/bash
+
+# Check if audio_dir is provided
+if [ -z "$1" ]; then
+    echo "Usage: $0 <audio_dir>"
+    exit 1
+fi
+
+audio_dir=$1
+input_dir="../audio/${audio_dir}"
+output_dir="../audio/finalized"
+output_file="${output_dir}/${audio_dir}.mp3"
+
+# Create the output directory if it doesn't exist
+mkdir -p "$output_dir"
+
+# Check if there are any .mp3 files in the input directory
+mp3_files=($(ls "$input_dir"/*.mp3 2>/dev/null))
+if [ ${#mp3_files[@]} -eq 0 ]; then
+    echo "No MP3 files found in ${input_dir}"
+    exit 1
+fi
+
+# Build the concatenation string for ffmpeg
+concat_str=$(printf "|%s" "${mp3_files[@]}")
+concat_str=${concat_str:1} # Remove leading '|'
+
+# Run the ffmpeg command
+ffmpeg -i "concat:${concat_str}" -acodec copy "$output_file"
+
+if [ $? -eq 0 ]; then
+    echo "Audio concatenation successful. Output saved to ${output_file}"
+else
+    echo "An error occurred during the concatenation process."
+fi

@@ -153,7 +153,7 @@ def main():
     output_file_path = process_pdf(pdf_filename)
 
     # experimental - uncomment at own risk
-    # remove_page_number_lines(output_file_path)
+    remove_page_number_lines(output_file_path)
     # remove_page_number_with_blank_line(output_file_path)
 
     calculate_cost_without_free_limit(output_file_path)

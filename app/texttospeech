@@ -1,0 +1,87 @@
+#!/usr/bin/env python3
+
+import os
+import argparse
+from google.cloud import texttospeech
+
+
+def convert_texts_to_speech(text_dir):
+    # Authenticate using the service account key
+    os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = '/secrets/key.json'
+
+    # Define paths for input text files and output MP3s
+    text_path = f'../text/{text_dir}'
+    audio_path = f'../audio/{text_dir}'
+
+    # Create output directory if it doesn't exist
+    os.makedirs(audio_path, exist_ok=True)
+
+    try:
+        # Get all .txt files from the text directory and sort them
+        text_files = sorted(
+            [f for f in os.listdir(text_path) if f.endswith(".txt")]
+            )
+
+        # Initialize the Text-to-Speech client
+        client = texttospeech.TextToSpeechClient()
+
+        # Process each text file
+        for text_file in text_files:
+            text_file_path = os.path.join(text_path, text_file)
+
+            # Read the contents of the text file
+            with open(text_file_path, "r") as file:
+                text_content = file.read()
+
+            if not text_content.strip():
+                print(f"Error: The input text file {text_file} is empty.")
+                continue
+
+            # Define the text input
+            synthesis_input = texttospeech.SynthesisInput(text=text_content)
+
+            # Select the voice parameters, using "en-US-Casual-K"
+            voice_params = texttospeech.VoiceSelectionParams(
+                language_code="en-US",
+                name="en-US-Casual-K"  # Use the Casual K voice
+            )
+
+            # Define the audio output configuration
+            audio_config = texttospeech.AudioConfig(
+                audio_encoding=texttospeech.AudioEncoding.MP3
+            )
+
+            # Perform the text-to-speech request
+            response = client.synthesize_speech(
+                input=synthesis_input,
+                voice=voice_params,
+                audio_config=audio_config
+            )
+
+            # Create the corresponding MP3 file name
+            mp3_file_name = text_file.replace(".txt", ".mp3")
+            mp3_file_path = os.path.join(audio_path, mp3_file_name)
+
+            # Save the output to an MP3 file
+            with open(mp3_file_path, "wb") as out:
+                out.write(response.audio_content)
+                print(f"Audio content written to {mp3_file_path}")
+
+    except Exception as e:
+        print(f"An error occurred: {e}")
+
+
+if __name__ == "__main__":
+    # Set up argument parsing
+    parser = argparse.ArgumentParser(
+        description='Convert text files in a dir to speech using Google TTS.'
+        )
+    parser.add_argument(
+        'text_dir', type=str, help='Name of the text dir containing the .txt'
+        )
+
+    # Parse the arguments
+    args = parser.parse_args()
+
+    # Call the conversion function
+    convert_texts_to_speech(args.text_dir)

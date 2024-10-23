@@ -1,2 +1,5 @@
+ffmpeg==1.4
+ffprobe==0.5
 google-cloud-texttospeech==2.18.0
 protobuf==5.27.5
+pydub==0.25.1
