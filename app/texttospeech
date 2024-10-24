@@ -5,6 +5,13 @@ import argparse
 from google.cloud import texttospeech
 
 
+def mark_file_as_done(text_file_path):
+    # Rename the original text file by appending .done
+    done_file_path = f"{text_file_path}.done"
+    os.rename(text_file_path, done_file_path)
+    print(f"Renamed {text_file_path} to {done_file_path}")
+
+
 def convert_texts_to_speech(text_dir):
     # Authenticate using the service account key
     os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = '/secrets/key.json'
@@ -66,6 +73,9 @@ def convert_texts_to_speech(text_dir):
             with open(mp3_file_path, "wb") as out:
                 out.write(response.audio_content)
                 print(f"Audio content written to {mp3_file_path}")
+
+            # Rename the text file to mark it as processed
+            mark_file_as_done(text_file_path)
 
     except Exception as e:
         print(f"An error occurred: {e}")

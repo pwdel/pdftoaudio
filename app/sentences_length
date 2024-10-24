@@ -1,0 +1,44 @@
+#!/usr/bin/env python3
+
+import re
+import argparse
+
+
+def split_into_sentences(text):
+    # This regex splits sentences at ., ! or ?
+    sentence_endings = re.compile(r'(?<=[.!?])\s+')
+    sentences = sentence_endings.split(text)
+    return sentences
+
+
+def analyze_sentences(file_path):
+    with open(file_path, 'r', encoding='utf-8') as f:
+        text = f.read()
+
+    # Use our regex-based sentence splitter
+    sentences = split_into_sentences(text)
+
+    # Process each sentence
+    for idx, sentence in enumerate(sentences):
+        char_count = len(sentence)
+        first_few_words = ' '.join(sentence.split()[:5])
+        print(
+            f"Sentence {idx + 1}: {char_count} characters | Starts with: "
+            f"\"{first_few_words}\""
+        )
+
+
+if __name__ == "__main__":
+    # Set up argument parsing
+    parser = argparse.ArgumentParser(
+        description="Analyze sentences in a text file."
+    )
+    parser.add_argument(
+        'file_path', type=str, help="Path to the input .txt file"
+    )
+
+    # Parse the arguments
+    args = parser.parse_args()
+
+    # Call the function to analyze sentences
+    analyze_sentences(args.file_path)

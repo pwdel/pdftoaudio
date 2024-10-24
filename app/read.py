@@ -33,7 +33,7 @@ def process_pdf(file_name: str) -> str:
             for i in range(number_of_pages):
                 page = reader.pages[i]
                 text = page.extract_text()
-                f.write(f"--- Page {i+1} ---\n{text}\n\n")
+                f.write(f"\n{text}\n\n")
         print(f"Text written to {output_file}")
 
         return output_file
@@ -42,35 +42,6 @@ def process_pdf(file_name: str) -> str:
         print(f"Error processing {file_name}: {e}")
 
         return ""
-
-
-def remove_page_number_lines(output_file_path: str):
-    """
-    This function removes lines of the form "--- Page X ---".
-    It modifies the file in place.
-
-    :param output_file_path: The full path to the output .txt file.
-    """
-    if not os.path.exists(output_file_path):
-        print(f"File '{output_file_path}' not found.")
-        return
-
-    with open(output_file_path, 'r') as file:
-        lines = file.readlines()
-
-    # Pattern to match lines like "--- Page 14 ---"
-    page_pattern = re.compile(r'^--- Page \d+ ---$')
-
-    # Filter out lines that match the pattern
-    cleaned_lines = [
-        line for line in lines if not page_pattern.match(line.strip())
-        ]
-
-    # Overwrite the file with the cleaned content
-    with open(output_file_path, 'w') as file:
-        file.writelines(cleaned_lines)
-
-    print(f"Page number lines removed from {output_file_path}.")
 
 
 def remove_page_number_with_blank_line(output_file_path: str) -> str:
@@ -153,7 +124,6 @@ def main():
     output_file_path = process_pdf(pdf_filename)
 
     # experimental - uncomment at own risk
-    remove_page_number_lines(output_file_path)
     # remove_page_number_with_blank_line(output_file_path)
 
     calculate_cost_without_free_limit(output_file_path)

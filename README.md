@@ -24,3 +24,26 @@
 
 
 [Google TTS Quotas](https://cloud.google.com/text-to-speech/quotas)
+
+
+## SSML Reference Guide
+
+https://cloud.google.com/text-to-speech/docs/ssml
+
+## Known Errors in Google SSML
+
+### Sentences Too Long
+
+* The following type of error may arise:
+
+`An error occurred: 400 This request contains sentences that are too long. Consider splitting up long sentences with sentence ending punctuation e.g. periods. Also consider removing SSML sentence tags (e.g. '<s>') as they can confuse Cloud Text-to-Speech.`
+
+* We have put together `sentences_length` to analyze individual documents for sentences that might be too long. Run this on the document in question with, for example:
+
+```
+./sentences_length ../text/document_title/04.txt
+```
+
+* ...This will print out the length of each sentance via a simple regex function, demarcating sentances by `.`, `!` or `?`.
+
+* Typically sentances with 500+ characters are too long for Google TTS.
