@@ -77,6 +77,32 @@ class JobWorkspaceTests(unittest.TestCase):
         self.assertEqual(status["files"]["text/sanitized.txt"], "missing")
         self.assertEqual(status["next_command"], "pdftoaudio sanitize my-book")
 
+    def test_inspect_status_suggests_chunk_after_cleaned_text(self):
+        init_job(self.project_root, "my-book", self.source_pdf)
+        paths = resolve_job(self.project_root, "my-book")
+        paths.raw_text.write_text("raw text", encoding="utf-8")
+        paths.sanitized_text.write_text("sanitized text", encoding="utf-8")
+        paths.review_report.write_text("{}", encoding="utf-8")
+        paths.cleaned_text.write_text("cleaned text", encoding="utf-8")
+
+        status = inspect_status(paths)
+
+        self.assertEqual(status["next_command"], "pdftoaudio chunk my-book")
+
+    def test_inspect_status_suggests_synthesis_after_sanitized_chunks(self):
+        init_job(self.project_root, "my-book", self.source_pdf)
+        paths = resolve_job(self.project_root, "my-book")
+        paths.raw_text.write_text("raw text", encoding="utf-8")
+        paths.sanitized_text.write_text("sanitized text", encoding="utf-8")
+        paths.review_report.write_text("{}", encoding="utf-8")
+        paths.chunk_report.write_text("{}", encoding="utf-8")
+
+        status = inspect_status(paths)
+
+        self.assertEqual(
+            status["next_command"], "pdftoaudio synthesize my-book --provider google"
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

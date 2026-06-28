@@ -30,7 +30,34 @@ class CliTests(unittest.TestCase):
         self.assertEqual(code, 0)
         self.assertIn("init", stdout)
         self.assertIn("status", stdout)
+        self.assertIn("chunk", stdout)
+        self.assertIn("help", stdout)
         self.assertEqual(stderr, "")
+
+    def test_help_command_lists_commands(self):
+        code, stdout, stderr = self.run_cli(["help"])
+
+        self.assertEqual(code, 0)
+        self.assertIn("init", stdout)
+        self.assertIn("status", stdout)
+        self.assertIn("chunk", stdout)
+        self.assertIn("help", stdout)
+        self.assertEqual(stderr, "")
+
+    def test_help_command_prints_command_help(self):
+        code, stdout, stderr = self.run_cli(["help", "chunk"])
+
+        self.assertEqual(code, 0)
+        self.assertIn("usage: pdftoaudio chunk", stdout)
+        self.assertIn("--max-bytes", stdout)
+        self.assertEqual(stderr, "")
+
+    def test_help_command_rejects_unknown_topic(self):
+        code, stdout, stderr = self.run_cli(["help", "missing"])
+
+        self.assertEqual(code, 2)
+        self.assertEqual(stdout, "")
+        self.assertIn("Unknown help topic: missing", stderr)
 
     def test_init_creates_job(self):
         code, stdout, stderr = self.run_cli(["init", "my-book", str(self.pdf)])
@@ -88,6 +115,15 @@ class CliTests(unittest.TestCase):
         self.assertEqual(code, 1)
         self.assertEqual(stdout, "")
         self.assertIn("Missing sanitized text", stderr)
+
+    def test_chunk_missing_cleaned_text_reports_error(self):
+        self.run_cli(["init", "my-book", str(self.pdf)])
+
+        code, stdout, stderr = self.run_cli(["chunk", "my-book"])
+
+        self.assertEqual(code, 1)
+        self.assertEqual(stdout, "")
+        self.assertIn("Missing cleaned text", stderr)
 
 
 if __name__ == "__main__":

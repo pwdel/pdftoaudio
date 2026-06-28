@@ -1,12 +1,14 @@
 from __future__ import annotations
 
 import re
+from bisect import bisect_right
 from typing import Any
 
 from .jobs import JobPaths, atomic_write_json, update_step, utc_now
 
 
-SENTENCE_SPLIT_RE = re.compile(r"(?<=[.!?])\s+")
+SENTENCE_RE = re.compile(r"[^.!?]+(?:[.!?]+|$)", re.MULTILINE)
+LONG_SENTENCE_CHAR_LIMIT = 500
 
 
 def issue(
@@ -27,17 +29,30 @@ def issue(
     }
 
 
-def find_long_sentences(text: str, start_line: int) -> list[dict[str, Any]]:
+def line_starts(text: str) -> list[int]:
+    starts = [0]
+    for index, character in enumerate(text):
+        if character == "\n":
+            starts.append(index + 1)
+    return starts
+
+
+def line_for_offset(starts: list[int], offset: int) -> int:
+    return bisect_right(starts, offset)
+
+
+def find_long_sentences(text: str) -> list[dict[str, Any]]:
     findings: list[dict[str, Any]] = []
-    sentences = SENTENCE_SPLIT_RE.split(text)
-    for sentence in sentences:
+    starts = line_starts(text)
+    for match in SENTENCE_RE.finditer(text):
+        sentence = match.group(0)
         compact = " ".join(sentence.split())
-        if len(compact) >= 500:
+        if len(compact) >= LONG_SENTENCE_CHAR_LIMIT:
             findings.append(
                 issue(
                     "long_sentence",
-                    start_line,
-                    start_line,
+                    line_for_offset(starts, match.start()),
+                    line_for_offset(starts, max(match.end() - 1, match.start())),
                     "high",
                     "Sentence is at least 500 characters and may fail TTS.",
                     compact,
@@ -101,7 +116,7 @@ def review_text(text: str, book: str) -> dict[str, Any]:
                 )
             )
 
-        issues.extend(find_long_sentences(line, index))
+    issues.extend(find_long_sentences(text))
 
     return {
         "schema_version": 1,

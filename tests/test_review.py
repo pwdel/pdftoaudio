@@ -42,6 +42,15 @@ class ReviewTests(unittest.TestCase):
         self.assertIn("long_sentence", codes)
         self.assertIn("non_ascii_character", codes)
 
+    def test_review_text_flags_multiline_long_sentence_with_line_range(self):
+        text = ("first line " * 28).strip() + "\n" + ("second line " * 28).strip() + "."
+
+        report = review_text(text, "my-book")
+        long_sentence = next(issue for issue in report["issues"] if issue["code"] == "long_sentence")
+
+        self.assertEqual(long_sentence["line_start"], 1)
+        self.assertEqual(long_sentence["line_end"], 2)
+
     def test_review_job_writes_report_and_updates_manifest(self):
         self.paths.sanitized_text.write_text("1\nContent\n", encoding="utf-8")
 
