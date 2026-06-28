@@ -6,6 +6,7 @@ from pathlib import Path
 
 from .extract import extract_pdf
 from .jobs import init_job, inspect_status, resolve_job
+from .review import review_job
 from .sanitize import sanitize_job
 
 
@@ -100,6 +101,14 @@ def main(argv: list[str] | None = None, project_root: Path | None = None) -> int
                 print(f"next: pdftoaudio sanitize {args.book}")
             else:
                 print(f"next: pdftoaudio review {args.book}")
+            return 0
+
+        if args.command == "review":
+            paths = resolve_job(root, args.book)
+            report = review_job(paths, force=args.force)
+            print(f"Wrote review report: jobs/{args.book}/reports/review.json")
+            print(f"issues: {len(report['issues'])}")
+            print(f"next: pdftoaudio clean {args.book} --mode codex")
             return 0
 
         parser.error(f"Command not wired yet: {args.command}")
