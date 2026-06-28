@@ -4,6 +4,7 @@ import argparse
 import sys
 from pathlib import Path
 
+from .extract import extract_pdf
 from .jobs import init_job, inspect_status, resolve_job
 
 
@@ -82,6 +83,13 @@ def main(argv: list[str] | None = None, project_root: Path | None = None) -> int
 
         if args.command == "status":
             return print_status(root, args.book)
+
+        if args.command == "extract":
+            paths = resolve_job(root, args.book)
+            extract_pdf(paths, force=args.force)
+            print(f"Extracted raw text: jobs/{args.book}/text/raw.txt")
+            print(f"next: pdftoaudio sanitize {args.book}")
+            return 0
 
         parser.error(f"Command not wired yet: {args.command}")
         return 2

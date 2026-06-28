@@ -60,6 +60,17 @@ class CliTests(unittest.TestCase):
         self.assertEqual(stdout, "")
         self.assertIn("Missing job manifest", stderr)
 
+    def test_extract_missing_source_reports_error(self):
+        self.run_cli(["init", "my-book", str(self.pdf)])
+        source = self.project_root / "jobs/my-book/source/original.pdf"
+        source.unlink()
+
+        code, stdout, stderr = self.run_cli(["extract", "my-book"])
+
+        self.assertEqual(code, 1)
+        self.assertEqual(stdout, "")
+        self.assertIn("Missing source PDF", stderr)
+
 
 if __name__ == "__main__":
     unittest.main()
