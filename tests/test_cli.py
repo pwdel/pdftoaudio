@@ -71,6 +71,15 @@ class CliTests(unittest.TestCase):
         self.assertEqual(stdout, "")
         self.assertIn("Missing source PDF", stderr)
 
+    def test_sanitize_missing_raw_text_reports_error(self):
+        self.run_cli(["init", "my-book", str(self.pdf)])
+
+        code, stdout, stderr = self.run_cli(["sanitize", "my-book"])
+
+        self.assertEqual(code, 1)
+        self.assertEqual(stdout, "")
+        self.assertIn("Missing raw text", stderr)
+
 
 if __name__ == "__main__":
     unittest.main()

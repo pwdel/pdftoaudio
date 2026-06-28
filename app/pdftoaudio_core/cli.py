@@ -6,6 +6,7 @@ from pathlib import Path
 
 from .extract import extract_pdf
 from .jobs import init_job, inspect_status, resolve_job
+from .sanitize import sanitize_job
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -89,6 +90,16 @@ def main(argv: list[str] | None = None, project_root: Path | None = None) -> int
             extract_pdf(paths, force=args.force)
             print(f"Extracted raw text: jobs/{args.book}/text/raw.txt")
             print(f"next: pdftoaudio sanitize {args.book}")
+            return 0
+
+        if args.command == "sanitize":
+            paths = resolve_job(root, args.book)
+            sanitize_job(paths, force=args.force, report_only=args.report_only)
+            print(f"Wrote sanitize report: jobs/{args.book}/reports/sanitize.json")
+            if args.report_only:
+                print(f"next: pdftoaudio sanitize {args.book}")
+            else:
+                print(f"next: pdftoaudio review {args.book}")
             return 0
 
         parser.error(f"Command not wired yet: {args.command}")
