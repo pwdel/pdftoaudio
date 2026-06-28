@@ -1,4 +1,33 @@
-## To Run:
+## Job CLI Workflow
+
+The new workflow uses one directory per book under `jobs/`.
+
+```bash
+./pdftoaudio init my-book ./books/my-book.pdf
+./pdftoaudio extract my-book
+./pdftoaudio sanitize my-book
+./pdftoaudio review my-book
+./pdftoaudio status my-book
+```
+
+Files are written under:
+
+```text
+jobs/my-book/
+  source/original.pdf
+  text/raw.txt
+  text/sanitized.txt
+  reports/sanitize.json
+  reports/line-map.json
+  reports/review.json
+  manifest.json
+```
+
+`sanitize` applies conservative character and whitespace cleanup. `review` does not edit text; it flags suspicious line ranges for later Codex or MLX cleanup.
+
+The older script workflow still exists while the CLI migration is in progress.
+
+## Older Script Workflow
 
 * Place a text PDF within the `books/` directory. To make it easier, rename it something that is easy to type such as, `pdf_name.pdf`
 * Within the project root directory, run `./read pdf ${pdf_name.pdf}` in the terminal.
