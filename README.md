@@ -7,6 +7,7 @@ The new workflow uses one directory per book under `jobs/`.
 ./pdftoaudio extract my-book
 ./pdftoaudio sanitize my-book
 ./pdftoaudio review my-book
+./pdftoaudio chunk my-book
 ./pdftoaudio status my-book
 ```
 
@@ -20,10 +21,43 @@ jobs/my-book/
   reports/sanitize.json
   reports/line-map.json
   reports/review.json
+  reports/chunk.json
+  chunks/001.txt
+  chunks/002.txt
   manifest.json
 ```
 
-`sanitize` applies conservative character and whitespace cleanup. `review` does not edit text; it flags suspicious line ranges for later Codex or MLX cleanup.
+`sanitize` applies conservative character and whitespace cleanup. `review` does not edit text; it flags suspicious line ranges for later Codex or MLX cleanup. `chunk` splits cleaned text into numbered files sized for TTS requests.
+
+`chunk` reads `text/cleaned.txt` by default:
+
+```bash
+./pdftoaudio chunk my-book
+```
+
+During the migration, you can chunk sanitized text before a cleanup backend exists:
+
+```bash
+./pdftoaudio chunk my-book --source sanitized
+```
+
+The default chunk limit is 4,900 UTF-8 bytes. `chunk` keeps each request-sized file under that byte limit. It prefers sentence endings, then paragraph, line, and whitespace boundaries; if punctuation is missing, it still chunks by size instead of treating the whole run as one sentence.
+
+## Long Sentences
+
+Google TTS can reject input that contains very long sentences. The older `sentences_length` helper still exists for inspecting one legacy chunk file:
+
+```bash
+./sentences_length ../text/document_title/04.txt
+```
+
+The new CLI checks this earlier:
+
+```bash
+./pdftoaudio review my-book
+```
+
+`review` scans `jobs/my-book/text/sanitized.txt` and writes `jobs/my-book/reports/review.json`. Sentences at 500 characters or longer are reported with the issue code `long_sentence`. The command only reports the issue; it does not split or rewrite the sentence.
 
 The older script workflow still exists while the CLI migration is in progress.
 
@@ -73,6 +107,6 @@ https://cloud.google.com/text-to-speech/docs/ssml
 ./sentences_length ../text/document_title/04.txt
 ```
 
-* ...This will print out the length of each sentance via a simple regex function, demarcating sentances by `.`, `!` or `?`.
+* ...This will print out the length of each sentence via a simple regex function, demarcating sentences by `.`, `!` or `?`.
 
-* Typically sentances with 500+ characters are too long for Google TTS.
+* Typically sentences with 500+ characters are too long for Google TTS.

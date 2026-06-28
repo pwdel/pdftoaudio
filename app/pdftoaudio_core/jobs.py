@@ -30,6 +30,7 @@ class JobPaths:
     sanitize_report: Path
     line_map_report: Path
     review_report: Path
+    chunk_report: Path
 
 
 def utc_now() -> str:
@@ -69,6 +70,7 @@ def resolve_job(project_root: Path, book: str) -> JobPaths:
         sanitize_report=reports_dir / "sanitize.json",
         line_map_report=reports_dir / "line-map.json",
         review_report=reports_dir / "review.json",
+        chunk_report=reports_dir / "chunk.json",
     )
 
 
@@ -171,6 +173,7 @@ STATUS_FILES = (
     ("reports/line-map.json", "line_map_report"),
     ("reports/review.json", "review_report"),
     ("text/cleaned.txt", "cleaned_text"),
+    ("reports/chunk.json", "chunk_report"),
 )
 
 
@@ -184,8 +187,12 @@ def next_command(paths: JobPaths) -> str | None:
     if not paths.review_report.exists():
         return f"pdftoaudio review {paths.book}"
     if not paths.cleaned_text.exists():
+        if paths.chunk_report.exists():
+            return f"pdftoaudio synthesize {paths.book} --provider google"
         return f"pdftoaudio clean {paths.book} --mode codex"
-    return None
+    if not paths.chunk_report.exists():
+        return f"pdftoaudio chunk {paths.book}"
+    return f"pdftoaudio synthesize {paths.book} --provider google"
 
 
 def inspect_status(paths: JobPaths) -> dict[str, Any]:
