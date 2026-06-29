@@ -9,12 +9,20 @@ from .extract import extract_pdf
 from .jobs import init_job, inspect_status, resolve_job
 from .review import review_job
 from .sanitize import sanitize_job
+from .workspace import inspect_workspace, workspace_ready
 
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="pdftoaudio",
         description="Turn PDFs into audiobooks through inspectable local job files.",
+        epilog=(
+            "Workspace:\n"
+            "  Put source PDFs in books/, then run: pdftoaudio init my-book books/my-book.pdf\n"
+            "  Generated job files live under jobs/<book>/ and jobs/ stays gitignored.\n"
+            "  Run pdftoaudio workspace --fix to create local folders."
+        ),
+        formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     subparsers = parser.add_subparsers(dest="command", required=True)
     command_parsers: dict[str, argparse.ArgumentParser] = {}
@@ -58,6 +66,22 @@ def build_parser() -> argparse.ArgumentParser:
     chunk_parser.add_argument("--source", choices=("cleaned", "sanitized"), default="cleaned")
     chunk_parser.add_argument("--max-bytes", type=int, default=DEFAULT_MAX_BYTES)
 
+    workspace_parser = subparsers.add_parser(
+        "workspace",
+        help="Check or create local workspace directories",
+        description="Check project folders for source PDFs, generated jobs, and local secrets.",
+        epilog=(
+            "PDF workflow:\n"
+            "  1. Run: pdftoaudio workspace --fix\n"
+            "  2. Put source PDFs in books/\n"
+            "  3. Run: pdftoaudio init my-book books/my-book.pdf\n\n"
+            "Generated files live under jobs/<book>/ and jobs/ should remain gitignored."
+        ),
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    command_parsers["workspace"] = workspace_parser
+    workspace_parser.add_argument("--fix", action="store_true")
+
     help_parser = subparsers.add_parser("help", help="Show CLI help or command help")
     command_parsers["help"] = help_parser
     help_parser.add_argument("topic", nargs="?")
@@ -84,6 +108,20 @@ def print_status(project_root: Path, book: str) -> int:
         print()
         print("next: job foundation steps complete")
     return 0
+
+
+def print_workspace(project_root: Path, fix: bool) -> int:
+    entries = inspect_workspace(project_root, fix=fix)
+    for entry in entries:
+        print(f"{entry['path']:<10} {entry['status']:<13} {entry['purpose']}")
+
+    print()
+    if workspace_ready(entries):
+        print("put PDFs in books/, then run: pdftoaudio init my-book books/my-book.pdf")
+        return 0
+
+    print("run: pdftoaudio workspace --fix")
+    return 1
 
 
 def main(argv: list[str] | None = None, project_root: Path | None = None) -> int:
@@ -155,6 +193,9 @@ def main(argv: list[str] | None = None, project_root: Path | None = None) -> int
             print(f"chunks: {len(report['chunks'])}")
             print(f"next: pdftoaudio synthesize {args.book} --provider google")
             return 0
+
+        if args.command == "workspace":
+            return print_workspace(root, fix=args.fix)
 
         parser.error(f"Command not wired yet: {args.command}")
         return 2

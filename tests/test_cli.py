@@ -31,7 +31,10 @@ class CliTests(unittest.TestCase):
         self.assertIn("init", stdout)
         self.assertIn("status", stdout)
         self.assertIn("chunk", stdout)
+        self.assertIn("workspace", stdout)
         self.assertIn("help", stdout)
+        self.assertIn("Put source PDFs in books/", stdout)
+        self.assertIn("jobs/ stays gitignored", stdout)
         self.assertEqual(stderr, "")
 
     def test_help_command_lists_commands(self):
@@ -41,7 +44,9 @@ class CliTests(unittest.TestCase):
         self.assertIn("init", stdout)
         self.assertIn("status", stdout)
         self.assertIn("chunk", stdout)
+        self.assertIn("workspace", stdout)
         self.assertIn("help", stdout)
+        self.assertIn("Put source PDFs in books/", stdout)
         self.assertEqual(stderr, "")
 
     def test_help_command_prints_command_help(self):
@@ -58,6 +63,38 @@ class CliTests(unittest.TestCase):
         self.assertEqual(code, 2)
         self.assertEqual(stdout, "")
         self.assertIn("Unknown help topic: missing", stderr)
+
+    def test_help_command_prints_workspace_help(self):
+        code, stdout, stderr = self.run_cli(["help", "workspace"])
+
+        self.assertEqual(code, 0)
+        self.assertIn("Put source PDFs in books/", stdout)
+        self.assertIn("pdftoaudio init my-book books/my-book.pdf", stdout)
+        self.assertIn("jobs/<book>/", stdout)
+        self.assertEqual(stderr, "")
+
+    def test_workspace_reports_missing_directories(self):
+        code, stdout, stderr = self.run_cli(["workspace"])
+
+        self.assertEqual(code, 1)
+        self.assertIn("books/     missing", stdout)
+        self.assertIn("jobs/      missing", stdout)
+        self.assertIn("secrets/   missing", stdout)
+        self.assertIn("run: pdftoaudio workspace --fix", stdout)
+        self.assertEqual(stderr, "")
+
+    def test_workspace_fix_creates_directories(self):
+        code, stdout, stderr = self.run_cli(["workspace", "--fix"])
+
+        self.assertEqual(code, 0)
+        self.assertIn("books/     created", stdout)
+        self.assertIn("jobs/      created", stdout)
+        self.assertIn("secrets/   created", stdout)
+        self.assertIn("put PDFs in books/", stdout)
+        self.assertTrue((self.project_root / "books").is_dir())
+        self.assertTrue((self.project_root / "jobs").is_dir())
+        self.assertTrue((self.project_root / "secrets").is_dir())
+        self.assertEqual(stderr, "")
 
     def test_init_creates_job(self):
         code, stdout, stderr = self.run_cli(["init", "my-book", str(self.pdf)])

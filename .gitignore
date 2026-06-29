@@ -1,6 +1,8 @@
 *.pdf
 *.mp3
 .DS_Store
+
+# Local source documents, generated jobs, and credentials.
 books/*
 secrets/*
 text/*

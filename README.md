@@ -1,8 +1,25 @@
+## Project Workspace
+
+Create the local working folders before the first book:
+
+```bash
+./pdftoaudio workspace --fix
+```
+
+Put source PDFs in `books/`:
+
+```text
+books/my-book.pdf
+```
+
+Generated job files are written under `jobs/<book>/`. The repository keeps `*.pdf`, `books/*`, `jobs/`, and `secrets/*` in `.gitignore` so source PDFs, generated text, audio, and credentials do not get checked into GitHub by accident.
+
 ## Job CLI Workflow
 
 The new workflow uses one directory per book under `jobs/`.
 
 ```bash
+./pdftoaudio workspace --fix
 ./pdftoaudio init my-book ./books/my-book.pdf
 ./pdftoaudio extract my-book
 ./pdftoaudio sanitize my-book
